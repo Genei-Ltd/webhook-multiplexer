@@ -1,10 +1,9 @@
 use std::{
-    fs::{self, File},
+    fs::{self, File, TryLockError},
     io::Write,
     path::{Path, PathBuf},
 };
 
-use fs2::FileExt;
 use thiserror::Error;
 use uuid::Uuid;
 
@@ -65,16 +64,9 @@ impl RuntimePaths {
             .create(true)
             .open(&self.lock)
             .map_err(RuntimeError::OpenLock)?;
-        FileExt::try_lock_exclusive(&file).map_err(|error| {
-            // Contention is EWOULDBLOCK on Unix but ERROR_LOCK_VIOLATION on
-            // Windows, which does not map to `ErrorKind::WouldBlock`.
-            let contended = error.kind() == std::io::ErrorKind::WouldBlock
-                || error.raw_os_error() == fs2::lock_contended_error().raw_os_error();
-            if contended {
-                RuntimeError::AlreadyRunning
-            } else {
-                RuntimeError::Lock(error)
-            }
+        file.try_lock().map_err(|error| match error {
+            TryLockError::WouldBlock => RuntimeError::AlreadyRunning,
+            TryLockError::Error(error) => RuntimeError::Lock(error),
         })?;
         Ok(InstanceLock { _file: file })
     }
