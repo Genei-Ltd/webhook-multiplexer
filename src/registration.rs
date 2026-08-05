@@ -96,7 +96,13 @@ where
                         Ok(renewed) => lease = renewed,
                         Err(error) => {
                             warn!(%error, lease_id = %lease.lease_id, "lease renewal failed; reconnecting");
-                            remove_lease_best_effort(&client, lease.lease_id).await;
+                            // Detached so a dead server's connect timeout
+                            // cannot delay re-registration.
+                            let client = client.clone();
+                            let lease_id = lease.lease_id;
+                            drop(tokio::spawn(async move {
+                                remove_lease_best_effort(&client, lease_id).await;
+                            }));
                             break;
                         }
                     }
