@@ -1,0 +1,67 @@
+[package]
+name = "webhook-multiplexer"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.97.1"
+description = "Fan out incoming HTTP webhooks to multiple dynamically registered targets"
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+keywords = ["cli", "development", "tunnel", "webhook"]
+categories = ["command-line-utilities", "development-tools", "web-programming::http-server"]
+publish = false
+
+[[bin]]
+name = "hmux"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1.0.104"
+axum = { version = "0.8.9", default-features = false, features = ["http1", "http2", "json", "tokio", "tracing"] }
+bytes = "1.12.1"
+clap = { version = "4.6.5", features = ["derive", "env"] }
+fs2 = "0.4.3"
+http = "1.5.0"
+http-body-util = "0.1"
+humantime = "2.4.0"
+nutype = { version = "0.7.0", features = ["serde"] }
+reqwest = { version = "0.13.4", default-features = false, features = ["http2", "json", "rustls"] }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.151"
+subtle = "2.6.1"
+thiserror = "2.0.19"
+tokio = { version = "1.53.1", features = ["fs", "io-util", "macros", "net", "process", "rt-multi-thread", "signal", "sync", "test-util", "time"] }
+tokio-util = { version = "0.7.19", features = ["rt"] }
+tracing = "0.1.44"
+tracing-subscriber = { version = "0.3.23", features = ["env-filter", "fmt", "json"] }
+url = { version = "2.5.8", features = ["serde"] }
+uuid = { version = "1.24.0", features = ["serde", "v4"] }
+
+[dev-dependencies]
+assert_cmd = "2.2.2"
+predicates = "3.1.4"
+tempfile = "3.27.0"
+
+[lints.rust]
+unsafe_code = "forbid"
+unused_must_use = "deny"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+pedantic = { level = "deny", priority = -1 }
+dbg_macro = "deny"
+expect_used = "deny"
+panic = "deny"
+todo = "deny"
+unimplemented = "deny"
+unwrap_used = "deny"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+module_name_repetitions = "allow"
+
+[profile.release]
+codegen-units = 1
+lto = "thin"
+strip = "symbols"
+
+[target."cfg(unix)".dependencies]
+rustix = { version = "1", default-features = false, features = ["process", "std"] }
