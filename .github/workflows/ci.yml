@@ -31,7 +31,7 @@ jobs:
           toolchain: 1.97.1
           components: clippy, rustfmt
       - name: Cache Cargo data
-        uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
+        uses: Swatinem/rust-cache@258712b0b7b1ddf8bddc9fc3b0faca682b2736c3 # v2
       - name: Check formatting
         run: cargo fmt --all --check
       - name: Run Clippy
@@ -65,7 +65,7 @@ jobs:
         with:
           toolchain: 1.97.1
       - name: Cache Cargo data
-        uses: Swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32 # v2
+        uses: Swatinem/rust-cache@258712b0b7b1ddf8bddc9fc3b0faca682b2736c3 # v2
       - name: Run tests
         run: cargo test --all-targets --all-features --locked
 
